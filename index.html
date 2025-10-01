@@ -806,14 +806,15 @@
     </div>
 
     <script>
-        // Firebase Configuration (Demo - replace with your own)
+        // Firebase Configuration - Real project for cross-device sync
         const firebaseConfig = {
-            apiKey: "demo-key",
-            authDomain: "audio-library-demo.firebaseapp.com",
-            projectId: "audio-library-demo",
-            storageBucket: "audio-library-demo.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "demo-app-id"
+            apiKey: "AIzaSyAP2n2Vnv6WlAgIoRKiS2VlhAfKnSU3myc",
+            authDomain: "audio-library-3322c.firebaseapp.com",
+            projectId: "audio-library-3322c",
+            storageBucket: "audio-library-3322c.firebasestorage.app",
+            messagingSenderId: "301393794701",
+            appId: "1:301393794701:web:801d3abd4e7481ae7674c4",
+            measurementId: "G-H3SJM7JQHT"
         };
 
         // Initialize Firebase (Demo mode - will use localStorage as fallback)
@@ -821,14 +822,22 @@
         let storage = null;
         let isFirebaseEnabled = false;
 
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            storage = firebase.storage();
-            isFirebaseEnabled = true;
-            console.log('Firebase initialized successfully');
-        } catch (error) {
-            console.log('Firebase not available, using localStorage only:', error.message);
+        // Check if we have real Firebase config (not demo)
+        const isRealFirebaseConfig = firebaseConfig.apiKey !== "demo-key";
+
+        if (isRealFirebaseConfig) {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                storage = firebase.storage();
+                isFirebaseEnabled = true;
+                console.log('Firebase initialized successfully');
+            } catch (error) {
+                console.log('Firebase initialization failed, using localStorage only:', error.message);
+                isFirebaseEnabled = false;
+            }
+        } else {
+            console.log('Using demo mode - localStorage only. To enable cloud sync, add your Firebase config.');
             isFirebaseEnabled = false;
         }
 
@@ -861,7 +870,7 @@
         // Sync to cloud (Firebase or fallback to localStorage)
         async function syncToCloud() {
             if (!isFirebaseEnabled) {
-                updateSyncStatus('💾 Saved locally');
+                updateSyncStatus('💾 Saved locally only');
                 return saveToLocalStorage();
             }
 
@@ -891,7 +900,7 @@
                 saveToLocalStorage();
             } catch (error) {
                 console.error('Sync error:', error);
-                updateSyncStatus('⚠️ Sync failed, saved locally', true);
+                updateSyncStatus('💾 Saved locally (cloud sync failed)');
                 saveToLocalStorage();
             }
         }
@@ -899,7 +908,7 @@
         // Load from cloud (Firebase or fallback to localStorage)
         async function loadFromCloud() {
             if (!isFirebaseEnabled) {
-                updateSyncStatus('💾 Loading from local storage');
+                updateSyncStatus('💾 Using local storage only');
                 return loadFromLocalStorage();
             }
 
@@ -943,7 +952,7 @@
                     saveToLocalStorage();
                 } else {
                     // No cloud data, try local
-                    updateSyncStatus('💾 No cloud data, loading locally');
+                    updateSyncStatus('💾 No cloud data, using local storage');
                     loadFromLocalStorage();
                 }
                 
@@ -952,7 +961,7 @@
                 updateCategoryFilter();
             } catch (error) {
                 console.error('Load error:', error);
-                updateSyncStatus('⚠️ Cloud load failed, using local data', true);
+                updateSyncStatus('💾 Using local storage (cloud unavailable)');
                 loadFromLocalStorage();
             }
         }
@@ -1392,5 +1401,5 @@
             await loadFromCloud();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'987eb759b4e45500',t:'MTc1OTM1MDYwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'987ec9a4e13b5500',t:'MTc1OTM1MTM1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
