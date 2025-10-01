@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio Library</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <style>
         body {
             box-sizing: border-box;
@@ -698,7 +702,7 @@
 
         /* High DPI displays */
         @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .audio-card {
+            .video-card {
                 border-width: 0.5px;
             }
             
@@ -770,6 +774,9 @@
             <button class="import-btn" onclick="clearStorage()" style="background: #666; margin-left: 15px;" id="clearBtn">
                 Clear All
             </button>
+            <div class="sync-status" id="syncStatus" style="margin-left: 15px; padding: 15px 20px; background: #f0f0f0; color: #666; font-size: 0.9rem; border-radius: 3px;">
+                🔄 Syncing...
+            </div>
             <input type="file" id="fileInput" class="file-input" multiple accept="audio/*" onchange="handleFileUpload(event)">
         </div>
 
@@ -786,7 +793,7 @@
         </div>
 
         <div class="stats" id="stats" style="display: none;">
-            <div class="stats-number" id="audioCount">0</div>
+            <div class="stats-number" id="videoCount">0</div>
             <div class="stats-label">Audio Files Imported</div>
         </div>
 
@@ -799,10 +806,156 @@
     </div>
 
     <script>
+        // Firebase Configuration (Demo - replace with your own)
+        const firebaseConfig = {
+            apiKey: "demo-key",
+            authDomain: "audio-library-demo.firebaseapp.com",
+            projectId: "audio-library-demo",
+            storageBucket: "audio-library-demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "demo-app-id"
+        };
+
+        // Initialize Firebase (Demo mode - will use localStorage as fallback)
+        let db = null;
+        let storage = null;
+        let isFirebaseEnabled = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            isFirebaseEnabled = true;
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.log('Firebase not available, using localStorage only:', error.message);
+            isFirebaseEnabled = false;
+        }
+
         const audioFiles = [];
         let filteredAudioFiles = [];
         let currentAudio = null;
         let nextId = 1;
+        let userId = getUserId();
+
+        // Generate or retrieve user ID
+        function getUserId() {
+            let id = localStorage.getItem('audioLibraryUserId');
+            if (!id) {
+                id = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                localStorage.setItem('audioLibraryUserId', id);
+            }
+            return id;
+        }
+
+        // Update sync status
+        function updateSyncStatus(message, isError = false) {
+            const syncStatus = document.getElementById('syncStatus');
+            if (syncStatus) {
+                syncStatus.textContent = message;
+                syncStatus.style.background = isError ? '#ffe6e6' : '#f0f0f0';
+                syncStatus.style.color = isError ? '#d63031' : '#666';
+            }
+        }
+
+        // Sync to cloud (Firebase or fallback to localStorage)
+        async function syncToCloud() {
+            if (!isFirebaseEnabled) {
+                updateSyncStatus('💾 Saved locally');
+                return saveToLocalStorage();
+            }
+
+            try {
+                updateSyncStatus('🔄 Syncing to cloud...');
+                
+                const audioData = audioFiles.map(audio => ({
+                    id: audio.id,
+                    title: audio.title,
+                    fileName: audio.fileName,
+                    fileSize: audio.fileSize,
+                    duration: audio.duration,
+                    category: audio.category || "",
+                    audioData: audio.audioData,
+                    timestamp: Date.now()
+                }));
+
+                await db.collection('audioLibraries').doc(userId).set({
+                    files: audioData,
+                    nextId: nextId,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                updateSyncStatus('☁️ Synced to cloud');
+                
+                // Also save locally as backup
+                saveToLocalStorage();
+            } catch (error) {
+                console.error('Sync error:', error);
+                updateSyncStatus('⚠️ Sync failed, saved locally', true);
+                saveToLocalStorage();
+            }
+        }
+
+        // Load from cloud (Firebase or fallback to localStorage)
+        async function loadFromCloud() {
+            if (!isFirebaseEnabled) {
+                updateSyncStatus('💾 Loading from local storage');
+                return loadFromLocalStorage();
+            }
+
+            try {
+                updateSyncStatus('🔄 Loading from cloud...');
+                
+                const doc = await db.collection('audioLibraries').doc(userId).get();
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    const cloudFiles = data.files || [];
+                    nextId = data.nextId || 1;
+
+                    // Clear current files
+                    audioFiles.length = 0;
+
+                    // Load cloud files
+                    cloudFiles.forEach(fileData => {
+                        const audio = document.createElement('audio');
+                        audio.src = fileData.audioData;
+                        
+                        const audioFile = {
+                            id: fileData.id,
+                            title: fileData.title,
+                            fileName: fileData.fileName,
+                            fileSize: fileData.fileSize,
+                            duration: fileData.duration,
+                            category: fileData.category || "",
+                            audioData: fileData.audioData,
+                            audioUrl: fileData.audioData,
+                            audioElement: audio
+                        };
+                        
+                        audio.load();
+                        audioFiles.push(audioFile);
+                    });
+
+                    updateSyncStatus('☁️ Loaded from cloud');
+                    
+                    // Also save locally as backup
+                    saveToLocalStorage();
+                } else {
+                    // No cloud data, try local
+                    updateSyncStatus('💾 No cloud data, loading locally');
+                    loadFromLocalStorage();
+                }
+                
+                renderAudioFiles();
+                updateStats();
+                updateCategoryFilter();
+            } catch (error) {
+                console.error('Load error:', error);
+                updateSyncStatus('⚠️ Cloud load failed, using local data', true);
+                loadFromLocalStorage();
+            }
+        }
 
         function handleFileUpload(event) {
             const files = event.target.files;
@@ -815,7 +968,8 @@
                     reader.onload = function(e) {
                         const audioData = e.target.result;
                         const audioUrl = audioData;
-                        const audio = new Audio(audioUrl);
+                        const audio = document.createElement('audio');
+                        audio.src = audioUrl;
 
                         const newAudio = {
                             id: nextId++,
@@ -823,8 +977,8 @@
                             fileName: file.name,
                             fileSize: formatFileSize(file.size),
                             duration: "0:00",
-                            category: "", // Add category field
-                            audioData: audioData, // Store base64 data
+                            category: "",
+                            audioData: audioData,
                             audioUrl: audioUrl,
                             audioElement: audio
                         };
@@ -835,8 +989,8 @@
                             const seconds = Math.floor(audio.duration % 60);
                             newAudio.duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
                             
-                            // Save to localStorage after getting duration
-                            saveToLocalStorage();
+                            // Sync to cloud after getting duration
+                            syncToCloud();
                             renderAudioFiles();
                         });
                         
@@ -882,12 +1036,12 @@
                 audioData: audio.audioData
             }));
             localStorage.setItem('audioLibrary', JSON.stringify(audioData));
-            localStorage.setItem('nextId', nextId.toString());
+            localStorage.setItem('nextAudioId', nextId.toString());
         }
 
         function loadFromLocalStorage() {
             const savedAudio = localStorage.getItem('audioLibrary');
-            const savedNextId = localStorage.getItem('nextId');
+            const savedNextId = localStorage.getItem('nextAudioId');
             
             if (savedNextId) {
                 nextId = parseInt(savedNextId);
@@ -898,7 +1052,7 @@
                     const audioData = JSON.parse(savedAudio);
                     audioData.forEach(data => {
                         // Create new audio element with the stored base64 data
-                        const audio = new Audio();
+                        const audio = document.createElement('audio');
                         audio.src = data.audioData;
                         
                         const audioFile = {
@@ -928,14 +1082,26 @@
             }
         }
 
-        function clearStorage() {
-            if (confirm('Are you sure you want to delete all audio files?')) {
+        async function clearStorage() {
+            if (confirm('Are you sure you want to delete all audio files? This will clear both local and cloud storage.')) {
+                // Clear cloud storage
+                if (isFirebaseEnabled) {
+                    try {
+                        await db.collection('audioLibraries').doc(userId).delete();
+                        updateSyncStatus('☁️ Cloud data cleared');
+                    } catch (error) {
+                        console.error('Error clearing cloud data:', error);
+                    }
+                }
+                
+                // Clear local storage
                 localStorage.removeItem('audioLibrary');
-                localStorage.removeItem('nextId');
+                localStorage.removeItem('nextAudioId');
                 audioFiles.length = 0;
                 nextId = 1;
                 renderAudioFiles();
                 updateStats();
+                updateSyncStatus('🗑️ All data cleared');
                 console.log('All audio files cleared from storage');
             }
         }
@@ -1015,6 +1181,10 @@
                             Delete
                         </button>
                     </div>
+                    <audio id="audioElement${audio.id}" style="display: none;">
+                        <source src="${audio.audioUrl}" type="${audio.fileName.split('.').pop()}">
+                        Your browser does not support the audio element.
+                    </audio>
                 </div>
             `).join('');
         }
@@ -1022,11 +1192,12 @@
         function togglePlay(id) {
             const audio = audioFiles.find(a => a.id === id);
             const playBtn = document.getElementById(`playBtn${id}`);
+            const audioElement = document.getElementById(`audioElement${id}`);
 
-            if (!audio) return;
+            if (!audio || !audioElement) return;
 
             // Stop any currently playing audio
-            if (currentAudio && currentAudio !== audio.audioElement) {
+            if (currentAudio && currentAudio !== audioElement) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
                 // Reset all play buttons
@@ -1036,19 +1207,19 @@
                 });
             }
 
-            if (audio.audioElement.paused) {
-                audio.audioElement.play();
+            if (audioElement.paused) {
+                audioElement.play();
                 playBtn.textContent = 'Pause';
                 playBtn.classList.add('playing');
-                currentAudio = audio.audioElement;
+                currentAudio = audioElement;
 
-                audio.audioElement.addEventListener('ended', function() {
+                audioElement.addEventListener('ended', function() {
                     playBtn.textContent = 'Play';
                     playBtn.classList.remove('playing');
                     currentAudio = null;
                 });
             } else {
-                audio.audioElement.pause();
+                audioElement.pause();
                 playBtn.textContent = 'Play';
                 playBtn.classList.remove('playing');
                 currentAudio = null;
@@ -1067,18 +1238,19 @@
             document.body.removeChild(link);
         }
 
-        function deleteAudio(id) {
+        async function deleteAudio(id) {
             if (confirm('Are you sure you want to delete this audio file?')) {
                 const index = audioFiles.findIndex(a => a.id === id);
                 if (index !== -1) {
                     // Stop audio if it's currently playing
-                    if (currentAudio === audioFiles[index].audioElement) {
+                    const audioElement = document.getElementById(`audioElement${id}`);
+                    if (currentAudio === audioElement) {
                         currentAudio.pause();
                         currentAudio = null;
                     }
                     
                     audioFiles.splice(index, 1);
-                    saveToLocalStorage();
+                    await syncToCloud();
                     renderAudioFiles();
                     updateStats();
                 }
@@ -1087,7 +1259,7 @@
 
         function updateStats() {
             const stats = document.getElementById('stats');
-            const audioCount = document.getElementById('audioCount');
+            const audioCount = document.getElementById('videoCount');
             
             if (audioFiles.length > 0) {
                 stats.style.display = 'block';
@@ -1155,7 +1327,7 @@
             }
         }
 
-        function saveCategory(audioId) {
+        async function saveCategory(audioId) {
             const inputField = document.getElementById(`categoryField${audioId}`);
             if (inputField) {
                 const category = inputField.value.trim();
@@ -1163,7 +1335,7 @@
                 
                 if (audio) {
                     audio.category = category;
-                    saveToLocalStorage();
+                    await syncToCloud();
                     updateCategoryFilter();
                     renderAudioFiles();
                 }
@@ -1187,12 +1359,12 @@
             }
         }
 
-        function deleteCategory(audioId) {
+        async function deleteCategory(audioId) {
             const audio = audioFiles.find(a => a.id === audioId);
             if (audio && audio.category) {
                 if (confirm(`Remove category "${audio.category}" from this audio file?`)) {
                     audio.category = "";
-                    saveToLocalStorage();
+                    await syncToCloud();
                     updateCategoryFilter();
                     renderAudioFiles();
                 }
@@ -1216,9 +1388,9 @@
         }
 
         // Initialize - load saved files and render
-        loadFromLocalStorage();
-        updateCategoryFilter();
-        renderAudioFiles();
+        window.addEventListener('load', async function() {
+            await loadFromCloud();
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'987ea01ee62e5500',t:'MTc1OTM0OTY1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'987eb759b4e45500',t:'MTc1OTM1MDYwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
