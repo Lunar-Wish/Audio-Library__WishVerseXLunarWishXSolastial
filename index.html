@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Library</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #666;
+            margin: 10px 0 0 0;
+            font-weight: 300;
+        }
+
+        .import-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .import-btn {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .import-btn:hover {
+            background: #333333;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .audio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .audio-card {
+            border: 1px solid #e0e0e0;
+            padding: 30px;
+            background: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .audio-card:hover {
+            border-color: #000000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .audio-title {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin: 0 0 15px 0;
+            color: #000000;
+            word-break: break-word;
+        }
+
+        .audio-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .audio-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .control-btn {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid #000000;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+
+        .control-btn:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .play-btn.playing {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin: 0 0 15px 0;
+            color: #000000;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin: 0;
+            font-weight: 300;
+        }
+
+        .stats {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #000000;
+            margin: 0;
+        }
+
+        .stats-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 5px 0 0 0;
+            font-weight: 300;
+        }
+
+        .search-section {
+            margin-bottom: 40px;
+        }
+
+        .search-bar {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+        }
+
+        .search-input:focus {
+            border-color: #000000;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        }
+
+        .clear-search-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-search-btn:hover {
+            color: #000000;
+        }
+
+        .category-section {
+            margin-bottom: 30px;
+        }
+
+        .category-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            margin-bottom: 15px;
+        }
+
+        .category-select:focus {
+            border-color: #000000;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            min-width: 150px;
+        }
+
+        .filter-select:focus {
+            border-color: #000000;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: #f5f5f5;
+            color: #666;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+
+        /* Base responsive styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: clamp(20px, 4vw, 40px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: clamp(40px, 8vw, 60px);
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: clamp(30px, 6vw, 40px);
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 300;
+            margin: 0;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        .header p {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            color: #666;
+            margin: 10px 0 0 0;
+            font-weight: 300;
+        }
+
+        .import-section {
+            text-align: center;
+            margin-bottom: clamp(40px, 8vw, 60px);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .import-btn {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: clamp(12px, 2vw, 15px) clamp(25px, 4vw, 40px);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            min-height: 44px;
+            white-space: nowrap;
+        }
+
+        .search-section {
+            margin-bottom: clamp(30px, 6vw, 40px);
+        }
+
+        .search-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: clamp(12px, 2vw, 15px) clamp(40px, 8vw, 50px) clamp(12px, 2vw, 15px) clamp(15px, 3vw, 20px);
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            min-height: 44px;
+        }
+
+        .clear-search-btn {
+            position: absolute;
+            right: clamp(10px, 2vw, 15px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+            width: clamp(30px, 6vw, 40px);
+            height: clamp(30px, 6vw, 40px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 30px;
+            min-height: 30px;
+        }
+
+        .filter-select {
+            padding: clamp(10px, 2vw, 12px) clamp(12px, 2vw, 15px);
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: clamp(0.85rem, 2vw, 0.9rem);
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            width: 100%;
+            min-height: 44px;
+        }
+
+        .stats {
+            text-align: center;
+            margin-bottom: clamp(30px, 6vw, 40px);
+            padding: clamp(15px, 3vw, 20px);
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stats-number {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 300;
+            color: #000000;
+            margin: 0;
+        }
+
+        .stats-label {
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            color: #666;
+            margin: 5px 0 0 0;
+            font-weight: 300;
+        }
+
+        .audio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+            gap: clamp(15px, 3vw, 30px);
+            margin-top: clamp(30px, 6vw, 40px);
+            width: 100%;
+        }
+
+        .audio-card {
+            border: 1px solid #e0e0e0;
+            padding: clamp(20px, 4vw, 30px);
+            background: #ffffff;
+            transition: all 0.3s ease;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .audio-title {
+            font-size: clamp(1.1rem, 2.5vw, 1.2rem);
+            font-weight: 400;
+            margin: 0 0 15px 0;
+            color: #000000;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+
+        .category-section {
+            margin-bottom: clamp(20px, 4vw, 30px);
+        }
+
+        .category-select {
+            width: 100%;
+            padding: clamp(10px, 2vw, 12px) clamp(12px, 2vw, 15px);
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: clamp(0.85rem, 2vw, 0.9rem);
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            margin-bottom: 15px;
+            min-height: 44px;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f5f5f5;
+            color: #666;
+            padding: 4px 8px;
+            font-size: clamp(0.75rem, 1.8vw, 0.8rem);
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+
+        .category-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .category-text {
+            background: #f5f5f5;
+            color: #666;
+            padding: 6px 10px;
+            font-size: clamp(0.75rem, 1.8vw, 0.8rem);
+            border-radius: 3px;
+            flex: 1;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .edit-category-btn, .delete-category-btn {
+            background: none;
+            border: 1px solid #ddd;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .edit-category-btn:hover, .delete-category-btn:hover {
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
+
+        .category-input-section {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .category-input-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .save-category-btn, .cancel-category-btn {
+            background: none;
+            border: 1px solid #ddd;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .save-category-btn {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .save-category-btn:hover {
+            background: #333;
+        }
+
+        .cancel-category-btn:hover {
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
+
+        .audio-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            color: #666;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .audio-controls {
+            display: flex;
+            gap: clamp(10px, 2vw, 15px);
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            flex: 1;
+            min-width: 80px;
+            background: #ffffff;
+            border: 1px solid #000000;
+            padding: clamp(10px, 2vw, 12px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: clamp(0.85rem, 2vw, 0.9rem);
+            font-weight: 400;
+            min-height: 44px;
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: clamp(60px, 10vw, 80px) clamp(15px, 3vw, 20px);
+            color: #666;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state h3 {
+            font-size: clamp(1.3rem, 3vw, 1.5rem);
+            font-weight: 300;
+            margin: 0 0 15px 0;
+            color: #000000;
+        }
+
+        .empty-state p {
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            margin: 0;
+            font-weight: 300;
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 480px) {
+            .import-section {
+                flex-direction: column;
+            }
+            
+            .import-btn {
+                width: 100%;
+                max-width: 280px;
+            }
+            
+            .audio-info {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .audio-controls {
+                flex-direction: column;
+            }
+            
+            .control-btn {
+                flex: none;
+            }
+        }
+
+        /* Tablet adjustments */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .search-filters {
+                flex-direction: column;
+            }
+            
+            .audio-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+            
+            .audio-controls {
+                flex-direction: column;
+            }
+        }
+
+        /* Desktop adjustments */
+        @media (min-width: 769px) {
+            .search-filters {
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .search-bar {
+                flex: 1;
+                margin: 0;
+            }
+            
+            .filter-select {
+                width: auto;
+                min-width: 150px;
+                max-width: 200px;
+            }
+            
+            .audio-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+            
+            .audio-controls {
+                flex-direction: row;
+            }
+        }
+
+        /* Large desktop optimizations */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1400px;
+            }
+            
+            .audio-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+        }
+
+        /* Ultra-wide screens */
+        @media (min-width: 1600px) {
+            .audio-grid {
+                grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            }
+        }
+
+        /* Landscape phone adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .header {
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+            }
+            
+            .import-section {
+                margin-bottom: 30px;
+            }
+            
+            .stats {
+                padding: 15px;
+                margin-bottom: 25px;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .audio-card {
+                border-width: 0.5px;
+            }
+            
+            .control-btn {
+                border-width: 0.5px;
+            }
+        }
+
+        /* Accessibility and touch improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .control-btn {
+                min-height: 48px;
+                padding: 15px 12px;
+            }
+            
+            .import-btn {
+                min-height: 48px;
+                padding: 15px 30px;
+            }
+            
+            .search-input {
+                min-height: 48px;
+            }
+            
+            .filter-select {
+                min-height: 48px;
+            }
+            
+            .category-select {
+                min-height: 48px;
+            }
+            
+            .clear-search-btn {
+                min-width: 44px;
+                min-height: 44px;
+            }
+        }
+
+        /* Container query support for modern browsers */
+        @supports (container-type: inline-size) {
+            .audio-card {
+                container-type: inline-size;
+            }
+            
+            @container (max-width: 300px) {
+                .audio-controls {
+                    flex-direction: column;
+                }
+                
+                .audio-info {
+                    flex-direction: column;
+                    gap: 5px;
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Audio Library</h1>
+            <p>Wish Verse X Lunar Wish X Solastial</p>
+        </div>
+
+        <div class="import-section">
+            <button class="import-btn" onclick="document.getElementById('fileInput').click()">
+                Import Audio Files
+            </button>
+            <button class="import-btn" onclick="clearStorage()" style="background: #666; margin-left: 15px;" id="clearBtn">
+                Clear All
+            </button>
+            <input type="file" id="fileInput" class="file-input" multiple accept="audio/*" onchange="handleFileUpload(event)">
+        </div>
+
+        <div class="search-section" id="searchSection" style="display: none;">
+            <div class="search-filters">
+                <div class="search-bar" style="flex: 1;">
+                    <input type="text" class="search-input" placeholder="Search audio files..." id="searchInput" oninput="performSearch()">
+                    <button class="clear-search-btn" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">×</button>
+                </div>
+                <select class="filter-select" id="categoryFilter" onchange="performSearch()">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stats-number" id="audioCount">0</div>
+            <div class="stats-label">Audio Files Imported</div>
+        </div>
+
+        <div class="audio-grid" id="audioGrid">
+            <div class="empty-state">
+                <h3>No audio files imported</h3>
+                <p>Click "Import Audio Files" to get started</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audioFiles = [];
+        let filteredAudioFiles = [];
+        let currentAudio = null;
+        let nextId = 1;
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            let importedCount = 0;
+
+            for (let file of files) {
+                if (file.type.startsWith('audio/')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const audioData = e.target.result;
+                        const audioUrl = audioData;
+                        const audio = new Audio(audioUrl);
+
+                        const newAudio = {
+                            id: nextId++,
+                            title: file.name.replace(/\.[^/.]+$/, ""),
+                            fileName: file.name,
+                            fileSize: formatFileSize(file.size),
+                            duration: "0:00",
+                            category: "", // Add category field
+                            audioData: audioData, // Store base64 data
+                            audioUrl: audioUrl,
+                            audioElement: audio
+                        };
+
+                        // Get duration when metadata loads
+                        audio.addEventListener('loadedmetadata', function() {
+                            const minutes = Math.floor(audio.duration / 60);
+                            const seconds = Math.floor(audio.duration % 60);
+                            newAudio.duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                            
+                            // Save to localStorage after getting duration
+                            saveToLocalStorage();
+                            renderAudioFiles();
+                        });
+                        
+                        // Handle audio loading errors
+                        audio.addEventListener('error', function(e) {
+                            console.error('Audio loading error:', e);
+                        });
+
+                        audioFiles.push(newAudio);
+                        renderAudioFiles();
+                        updateStats();
+                    };
+                    
+                    reader.readAsDataURL(file);
+                    importedCount++;
+                }
+            }
+
+            if (importedCount === 0) {
+                alert('No valid audio files selected');
+            }
+
+            // Clear the input
+            event.target.value = '';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function saveToLocalStorage() {
+            const audioData = audioFiles.map(audio => ({
+                id: audio.id,
+                title: audio.title,
+                fileName: audio.fileName,
+                fileSize: audio.fileSize,
+                duration: audio.duration,
+                category: audio.category || "",
+                audioData: audio.audioData
+            }));
+            localStorage.setItem('audioLibrary', JSON.stringify(audioData));
+            localStorage.setItem('nextId', nextId.toString());
+        }
+
+        function loadFromLocalStorage() {
+            const savedAudio = localStorage.getItem('audioLibrary');
+            const savedNextId = localStorage.getItem('nextId');
+            
+            if (savedNextId) {
+                nextId = parseInt(savedNextId);
+            }
+            
+            if (savedAudio) {
+                try {
+                    const audioData = JSON.parse(savedAudio);
+                    audioData.forEach(data => {
+                        // Create new audio element with the stored base64 data
+                        const audio = new Audio();
+                        audio.src = data.audioData;
+                        
+                        const audioFile = {
+                            id: data.id,
+                            title: data.title,
+                            fileName: data.fileName,
+                            fileSize: data.fileSize,
+                            duration: data.duration,
+                            category: data.category || "",
+                            audioData: data.audioData,
+                            audioUrl: data.audioData,
+                            audioElement: audio
+                        };
+                        
+                        // Ensure audio can be played
+                        audio.load();
+                        
+                        audioFiles.push(audioFile);
+                    });
+                    renderAudioFiles();
+                    updateStats();
+                } catch (error) {
+                    console.error('Error loading audio from localStorage:', error);
+                    // Clear corrupted data
+                    localStorage.removeItem('audioLibrary');
+                }
+            }
+        }
+
+        function clearStorage() {
+            if (confirm('Are you sure you want to delete all audio files?')) {
+                localStorage.removeItem('audioLibrary');
+                localStorage.removeItem('nextId');
+                audioFiles.length = 0;
+                nextId = 1;
+                renderAudioFiles();
+                updateStats();
+                console.log('All audio files cleared from storage');
+            }
+        }
+
+        function renderAudioFiles() {
+            const grid = document.getElementById('audioGrid');
+            const searchSection = document.getElementById('searchSection');
+            const displayFiles = filteredAudioFiles.length > 0 ? filteredAudioFiles : audioFiles;
+
+            // Show/hide search bar based on whether there are files
+            if (audioFiles.length > 0) {
+                searchSection.style.display = 'block';
+            } else {
+                searchSection.style.display = 'none';
+            }
+
+            if (audioFiles.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No audio files imported</h3>
+                        <p>Click "Import Audio Files" to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (displayFiles.length === 0 && filteredAudioFiles.length === 0 && document.getElementById('searchInput').value.trim() !== '') {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No matching audio files</h3>
+                        <p>Try a different search term or clear the search</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = displayFiles.map(audio => `
+                <div class="audio-card">
+                    <div class="audio-title">${audio.title}</div>
+                    <div class="category-section">
+                        ${audio.category ? `
+                            <div class="category-display" id="categoryDisplay${audio.id}">
+                                <div class="category-text">${audio.category}</div>
+                                <div class="category-actions">
+                                    <button class="edit-category-btn" onclick="editCategory(${audio.id})">Edit</button>
+                                    <button class="delete-category-btn" onclick="deleteCategory(${audio.id})">Delete</button>
+                                </div>
+                            </div>
+                            <div class="category-input-section" id="categoryInput${audio.id}" style="display: none;">
+                                <input type="text" class="category-select" placeholder="Enter category name..." value="${audio.category}" id="categoryField${audio.id}">
+                                <div class="category-input-actions">
+                                    <button class="save-category-btn" onclick="saveCategory(${audio.id})">Save</button>
+                                    <button class="cancel-category-btn" onclick="cancelEditCategory(${audio.id})">Cancel</button>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="category-input-section" id="categoryInput${audio.id}">
+                                <input type="text" class="category-select" placeholder="Enter category name..." value="" id="categoryField${audio.id}">
+                                <div class="category-input-actions">
+                                    <button class="save-category-btn" onclick="saveCategory(${audio.id})">Save</button>
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                    <div class="audio-info">
+                        <span>${audio.duration}</span>
+                        <span>${audio.fileSize}</span>
+                    </div>
+                    <div class="audio-controls">
+                        <button class="control-btn play-btn" onclick="togglePlay(${audio.id})" id="playBtn${audio.id}">
+                            Play
+                        </button>
+                        <button class="control-btn" onclick="downloadAudio(${audio.id})">
+                            Download
+                        </button>
+                        <button class="control-btn" onclick="deleteAudio(${audio.id})" style="color: #666;">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function togglePlay(id) {
+            const audio = audioFiles.find(a => a.id === id);
+            const playBtn = document.getElementById(`playBtn${id}`);
+
+            if (!audio) return;
+
+            // Stop any currently playing audio
+            if (currentAudio && currentAudio !== audio.audioElement) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                // Reset all play buttons
+                document.querySelectorAll('.play-btn').forEach(btn => {
+                    btn.textContent = 'Play';
+                    btn.classList.remove('playing');
+                });
+            }
+
+            if (audio.audioElement.paused) {
+                audio.audioElement.play();
+                playBtn.textContent = 'Pause';
+                playBtn.classList.add('playing');
+                currentAudio = audio.audioElement;
+
+                audio.audioElement.addEventListener('ended', function() {
+                    playBtn.textContent = 'Play';
+                    playBtn.classList.remove('playing');
+                    currentAudio = null;
+                });
+            } else {
+                audio.audioElement.pause();
+                playBtn.textContent = 'Play';
+                playBtn.classList.remove('playing');
+                currentAudio = null;
+            }
+        }
+
+        function downloadAudio(id) {
+            const audio = audioFiles.find(a => a.id === id);
+            if (!audio) return;
+
+            const link = document.createElement('a');
+            link.href = audio.audioUrl;
+            link.download = audio.fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function deleteAudio(id) {
+            if (confirm('Are you sure you want to delete this audio file?')) {
+                const index = audioFiles.findIndex(a => a.id === id);
+                if (index !== -1) {
+                    // Stop audio if it's currently playing
+                    if (currentAudio === audioFiles[index].audioElement) {
+                        currentAudio.pause();
+                        currentAudio = null;
+                    }
+                    
+                    audioFiles.splice(index, 1);
+                    saveToLocalStorage();
+                    renderAudioFiles();
+                    updateStats();
+                }
+            }
+        }
+
+        function updateStats() {
+            const stats = document.getElementById('stats');
+            const audioCount = document.getElementById('audioCount');
+            
+            if (audioFiles.length > 0) {
+                stats.style.display = 'block';
+                audioCount.textContent = audioFiles.length;
+            } else {
+                stats.style.display = 'none';
+            }
+        }
+
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const selectedCategory = document.getElementById('categoryFilter').value;
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            
+            let filtered = audioFiles;
+            
+            // Filter by category first
+            if (selectedCategory !== '') {
+                filtered = filtered.filter(audio => audio.category === selectedCategory);
+            }
+            
+            // Then filter by search term
+            if (searchTerm !== '') {
+                filtered = filtered.filter(audio => 
+                    audio.title.toLowerCase().includes(searchTerm) ||
+                    audio.fileName.toLowerCase().includes(searchTerm)
+                );
+                clearSearchBtn.style.display = 'flex';
+            } else {
+                clearSearchBtn.style.display = 'none';
+            }
+            
+            // Set filtered results
+            if (searchTerm !== '' || selectedCategory !== '') {
+                filteredAudioFiles = filtered;
+            } else {
+                filteredAudioFiles = [];
+            }
+            
+            renderAudioFiles();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            filteredAudioFiles = [];
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            renderAudioFiles();
+        }
+
+        function editCategory(audioId) {
+            const displayElement = document.getElementById(`categoryDisplay${audioId}`);
+            const inputElement = document.getElementById(`categoryInput${audioId}`);
+            
+            if (displayElement && inputElement) {
+                displayElement.style.display = 'none';
+                inputElement.style.display = 'flex';
+                
+                // Focus on the input field
+                const inputField = document.getElementById(`categoryField${audioId}`);
+                if (inputField) {
+                    inputField.focus();
+                    inputField.select();
+                }
+            }
+        }
+
+        function saveCategory(audioId) {
+            const inputField = document.getElementById(`categoryField${audioId}`);
+            if (inputField) {
+                const category = inputField.value.trim();
+                const audio = audioFiles.find(a => a.id === audioId);
+                
+                if (audio) {
+                    audio.category = category;
+                    saveToLocalStorage();
+                    updateCategoryFilter();
+                    renderAudioFiles();
+                }
+            }
+        }
+
+        function cancelEditCategory(audioId) {
+            const displayElement = document.getElementById(`categoryDisplay${audioId}`);
+            const inputElement = document.getElementById(`categoryInput${audioId}`);
+            
+            if (displayElement && inputElement) {
+                displayElement.style.display = 'flex';
+                inputElement.style.display = 'none';
+                
+                // Reset input field to original value
+                const audio = audioFiles.find(a => a.id === audioId);
+                const inputField = document.getElementById(`categoryField${audioId}`);
+                if (audio && inputField) {
+                    inputField.value = audio.category;
+                }
+            }
+        }
+
+        function deleteCategory(audioId) {
+            const audio = audioFiles.find(a => a.id === audioId);
+            if (audio && audio.category) {
+                if (confirm(`Remove category "${audio.category}" from this audio file?`)) {
+                    audio.category = "";
+                    saveToLocalStorage();
+                    updateCategoryFilter();
+                    renderAudioFiles();
+                }
+            }
+        }
+
+        function updateCategoryFilter() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const categories = [...new Set(audioFiles.map(audio => audio.category).filter(cat => cat !== ''))];
+            
+            // Clear existing options except "All Categories"
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            
+            // Add categories that are actually in use
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+        }
+
+        // Initialize - load saved files and render
+        loadFromLocalStorage();
+        updateCategoryFilter();
+        renderAudioFiles();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'987ea01ee62e5500',t:'MTc1OTM0OTY1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
