@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cross-Platform Audio Library</title>
+    <title>Audio Library</title>
     <style>
         body {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
-            min-height: 100vh;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
         }
 
         .container {
@@ -24,115 +24,47 @@
         .header {
             text-align: center;
             margin-bottom: 60px;
+            border-bottom: 1px solid #e0e0e0;
             padding-bottom: 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
         }
 
         .header h1 {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 300;
             margin: 0;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
         }
 
         .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin: 15px 0 0 0;
+            font-size: 1.1rem;
+            color: #666;
+            margin: 10px 0 0 0;
             font-weight: 300;
         }
 
-        .sync-info {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
         .import-section {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            align-items: center;
+            text-align: center;
             margin-bottom: 60px;
         }
 
         .import-btn {
-            background: rgba(255,255,255,0.2);
+            background: #000000;
             color: #ffffff;
-            border: 2px solid rgba(255,255,255,0.3);
-            padding: 15px 30px;
+            border: none;
+            padding: 15px 40px;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            border-radius: 50px;
-            backdrop-filter: blur(10px);
-            font-weight: 500;
+            font-weight: 400;
+            letter-spacing: 0.5px;
         }
 
         .import-btn:hover {
-            background: rgba(255,255,255,0.3);
-            border-color: rgba(255,255,255,0.5);
-            transform: translateY(-2px);
-        }
-
-        .sync-status {
-            background: rgba(76, 175, 80, 0.3);
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 0.9rem;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: #333333;
         }
 
         .file-input {
             display: none;
-        }
-
-        .qr-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .qr-content {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            max-width: 400px;
-            color: #333;
-            position: relative;
-        }
-
-        .qr-code {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            display: inline-block;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 2rem;
-            color: #666;
-            cursor: pointer;
         }
 
         .audio-grid {
@@ -143,34 +75,31 @@
         }
 
         .audio-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 20px;
+            border: 1px solid #e0e0e0;
             padding: 30px;
+            background: #ffffff;
             transition: all 0.3s ease;
         }
 
         .audio-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255,255,255,0.15);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-color: #000000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
         }
 
         .audio-title {
-            font-size: 1.3rem;
-            font-weight: 500;
-            margin: 0 0 20px 0;
-            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin: 0 0 15px 0;
+            color: #000000;
             word-break: break-word;
         }
 
         .audio-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             font-size: 0.9rem;
-            opacity: 0.8;
+            color: #666;
         }
 
         .audio-controls {
@@ -180,117 +109,649 @@
 
         .control-btn {
             flex: 1;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: #ffffff;
+            background: #ffffff;
+            border: 1px solid #000000;
             padding: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border-radius: 10px;
             font-size: 0.9rem;
-            font-weight: 500;
-            backdrop-filter: blur(10px);
+            font-weight: 400;
         }
 
         .control-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-1px);
+            background: #000000;
+            color: #ffffff;
         }
 
         .play-btn.playing {
-            background: rgba(255,255,255,0.4);
-            border-color: rgba(255,255,255,0.6);
+            background: #000000;
+            color: #ffffff;
         }
 
         .empty-state {
             text-align: center;
             padding: 80px 20px;
-            grid-column: 1 / -1;
+            color: #666;
         }
 
         .empty-state h3 {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 300;
-            margin: 0 0 20px 0;
-            opacity: 0.8;
+            margin: 0 0 15px 0;
+            color: #000000;
         }
 
         .empty-state p {
-            font-size: 1.1rem;
+            font-size: 1rem;
             margin: 0;
-            opacity: 0.7;
+            font-weight: 300;
         }
 
         .stats {
             text-align: center;
             margin-bottom: 40px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .stats-number {
-            font-size: 3rem;
+            font-size: 2rem;
             font-weight: 300;
+            color: #000000;
             margin: 0;
         }
 
         .stats-label {
-            font-size: 1rem;
-            opacity: 0.8;
-            margin: 10px 0 0 0;
+            font-size: 0.9rem;
+            color: #666;
+            margin: 5px 0 0 0;
+            font-weight: 300;
         }
 
         .search-section {
             margin-bottom: 40px;
         }
 
-        .search-input {
-            width: 100%;
+        .search-bar {
+            position: relative;
             max-width: 500px;
             margin: 0 auto;
-            display: block;
-            padding: 15px 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.1);
-            color: #ffffff;
-            font-size: 1rem;
-            border-radius: 50px;
-            outline: none;
-            backdrop-filter: blur(10px);
         }
 
-        .search-input::placeholder {
-            color: rgba(255,255,255,0.7);
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
         }
 
         .search-input:focus {
-            border-color: rgba(255,255,255,0.5);
-            background: rgba(255,255,255,0.15);
+            border-color: #000000;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px 15px;
-            }
-            
-            .header h1 {
-                font-size: 2.2rem;
-            }
-            
-            .audio-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
+        .clear-search-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-search-btn:hover {
+            color: #000000;
+        }
+
+        .category-section {
+            margin-bottom: 30px;
+        }
+
+        .category-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            margin-bottom: 15px;
+        }
+
+        .category-select:focus {
+            border-color: #000000;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            min-width: 150px;
+        }
+
+        .filter-select:focus {
+            border-color: #000000;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: #f5f5f5;
+            color: #666;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+
+        /* Base responsive styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: clamp(20px, 4vw, 40px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: clamp(40px, 8vw, 60px);
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: clamp(30px, 6vw, 40px);
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 300;
+            margin: 0;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        .header p {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            color: #666;
+            margin: 10px 0 0 0;
+            font-weight: 300;
+        }
+
+        .import-section {
+            text-align: center;
+            margin-bottom: clamp(40px, 8vw, 60px);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .import-btn {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: clamp(12px, 2vw, 15px) clamp(25px, 4vw, 40px);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            min-height: 44px;
+            white-space: nowrap;
+        }
+
+        .search-section {
+            margin-bottom: clamp(30px, 6vw, 40px);
+        }
+
+        .search-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: clamp(12px, 2vw, 15px) clamp(40px, 8vw, 50px) clamp(12px, 2vw, 15px) clamp(15px, 3vw, 20px);
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            min-height: 44px;
+        }
+
+        .clear-search-btn {
+            position: absolute;
+            right: clamp(10px, 2vw, 15px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+            width: clamp(30px, 6vw, 40px);
+            height: clamp(30px, 6vw, 40px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 30px;
+            min-height: 30px;
+        }
+
+        .filter-select {
+            padding: clamp(10px, 2vw, 12px) clamp(12px, 2vw, 15px);
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: clamp(0.85rem, 2vw, 0.9rem);
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            width: 100%;
+            min-height: 44px;
+        }
+
+        .stats {
+            text-align: center;
+            margin-bottom: clamp(30px, 6vw, 40px);
+            padding: clamp(15px, 3vw, 20px);
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stats-number {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 300;
+            color: #000000;
+            margin: 0;
+        }
+
+        .stats-label {
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            color: #666;
+            margin: 5px 0 0 0;
+            font-weight: 300;
+        }
+
+        .audio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+            gap: clamp(15px, 3vw, 30px);
+            margin-top: clamp(30px, 6vw, 40px);
+            width: 100%;
+        }
+
+        .audio-card {
+            border: 1px solid #e0e0e0;
+            padding: clamp(20px, 4vw, 30px);
+            background: #ffffff;
+            transition: all 0.3s ease;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .audio-title {
+            font-size: clamp(1.1rem, 2.5vw, 1.2rem);
+            font-weight: 400;
+            margin: 0 0 15px 0;
+            color: #000000;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+
+        .category-section {
+            margin-bottom: clamp(20px, 4vw, 30px);
+        }
+
+        .category-select {
+            width: 100%;
+            padding: clamp(10px, 2vw, 12px) clamp(12px, 2vw, 15px);
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: clamp(0.85rem, 2vw, 0.9rem);
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 300;
+            margin-bottom: 15px;
+            min-height: 44px;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f5f5f5;
+            color: #666;
+            padding: 4px 8px;
+            font-size: clamp(0.75rem, 1.8vw, 0.8rem);
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+
+        .category-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .category-text {
+            background: #f5f5f5;
+            color: #666;
+            padding: 6px 10px;
+            font-size: clamp(0.75rem, 1.8vw, 0.8rem);
+            border-radius: 3px;
+            flex: 1;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .edit-category-btn, .delete-category-btn {
+            background: none;
+            border: 1px solid #ddd;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .edit-category-btn:hover, .delete-category-btn:hover {
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
+
+        .category-input-section {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .category-input-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .save-category-btn, .cancel-category-btn {
+            background: none;
+            border: 1px solid #ddd;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .save-category-btn {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .save-category-btn:hover {
+            background: #333;
+        }
+
+        .cancel-category-btn:hover {
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
+
+        .audio-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            color: #666;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .audio-controls {
+            display: flex;
+            gap: clamp(10px, 2vw, 15px);
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            flex: 1;
+            min-width: 80px;
+            background: #ffffff;
+            border: 1px solid #000000;
+            padding: clamp(10px, 2vw, 12px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: clamp(0.85rem, 2vw, 0.9rem);
+            font-weight: 400;
+            min-height: 44px;
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: clamp(60px, 10vw, 80px) clamp(15px, 3vw, 20px);
+            color: #666;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state h3 {
+            font-size: clamp(1.3rem, 3vw, 1.5rem);
+            font-weight: 300;
+            margin: 0 0 15px 0;
+            color: #000000;
+        }
+
+        .empty-state p {
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            margin: 0;
+            font-weight: 300;
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 480px) {
             .import-section {
                 flex-direction: column;
             }
             
+            .import-btn {
+                width: 100%;
+                max-width: 280px;
+            }
+            
+            .audio-info {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
             .audio-controls {
                 flex-direction: column;
+            }
+            
+            .control-btn {
+                flex: none;
+            }
+        }
+
+        /* Tablet adjustments */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .search-filters {
+                flex-direction: column;
+            }
+            
+            .audio-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+            
+            .audio-controls {
+                flex-direction: column;
+            }
+        }
+
+        /* Desktop adjustments */
+        @media (min-width: 769px) {
+            .search-filters {
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .search-bar {
+                flex: 1;
+                margin: 0;
+            }
+            
+            .filter-select {
+                width: auto;
+                min-width: 150px;
+                max-width: 200px;
+            }
+            
+            .audio-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+            
+            .audio-controls {
+                flex-direction: row;
+            }
+        }
+
+        /* Large desktop optimizations */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1400px;
+            }
+            
+            .audio-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+        }
+
+        /* Ultra-wide screens */
+        @media (min-width: 1600px) {
+            .audio-grid {
+                grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            }
+        }
+
+        /* Landscape phone adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .header {
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+            }
+            
+            .import-section {
+                margin-bottom: 30px;
+            }
+            
+            .stats {
+                padding: 15px;
+                margin-bottom: 25px;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .audio-card {
+                border-width: 0.5px;
+            }
+            
+            .control-btn {
+                border-width: 0.5px;
+            }
+        }
+
+        /* Accessibility and touch improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .control-btn {
+                min-height: 48px;
+                padding: 15px 12px;
+            }
+            
+            .import-btn {
+                min-height: 48px;
+                padding: 15px 30px;
+            }
+            
+            .search-input {
+                min-height: 48px;
+            }
+            
+            .filter-select {
+                min-height: 48px;
+            }
+            
+            .category-select {
+                min-height: 48px;
+            }
+            
+            .clear-search-btn {
+                min-width: 44px;
+                min-height: 44px;
+            }
+        }
+
+        /* Container query support for modern browsers */
+        @supports (container-type: inline-size) {
+            .audio-card {
+                container-type: inline-size;
+            }
+            
+            @container (max-width: 300px) {
+                .audio-controls {
+                    flex-direction: column;
+                }
+                
+                .audio-info {
+                    flex-direction: column;
+                    gap: 5px;
+                }
             }
         }
     </style>
@@ -298,305 +759,54 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎵 Universal Audio Library</h1>
-            <p>Share your music instantly with QR codes</p>
-        </div>
-
-        <div class="sync-info">
-            <h3>📱 Cross-Platform Sharing</h3>
-            <p>✅ No cloud needed - works offline!</p>
-            <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 15px;">
-                Share via QR code or export/import files between devices
-            </p>
+            <h1>Audio Library</h1>
+            <p>Wish Verse X Lunar Wish X Solastial</p>
         </div>
 
         <div class="import-section">
             <button class="import-btn" onclick="document.getElementById('fileInput').click()">
-                📁 Import Audio Files
+                Import Audio Files
             </button>
-            <button class="import-btn" onclick="showQRCode()">
-                📱 Share via QR Code
+            <button class="import-btn" onclick="clearStorage()" style="background: #666; margin-left: 15px;" id="clearBtn">
+                Clear All
             </button>
-            <button class="import-btn" onclick="exportLibrary()">
-                💾 Export Library
-            </button>
-            <button class="import-btn" onclick="document.getElementById('importFileInput').click()">
-                📂 Import Library
-            </button>
-            <div class="sync-status" id="syncStatus">
-                📱 Ready to share
-            </div>
             <input type="file" id="fileInput" class="file-input" multiple accept="audio/*" onchange="handleFileUpload(event)">
-            <input type="file" id="importFileInput" class="file-input" accept=".json" onchange="importLibrary(event)">
         </div>
 
         <div class="search-section" id="searchSection" style="display: none;">
-            <input type="text" class="search-input" placeholder="🔍 Search your audio files..." id="searchInput" oninput="performSearch()">
+            <div class="search-filters">
+                <div class="search-bar" style="flex: 1;">
+                    <input type="text" class="search-input" placeholder="Search audio files..." id="searchInput" oninput="performSearch()">
+                    <button class="clear-search-btn" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">×</button>
+                </div>
+                <select class="filter-select" id="categoryFilter" onchange="performSearch()">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
         </div>
 
         <div class="stats" id="stats" style="display: none;">
             <div class="stats-number" id="audioCount">0</div>
-            <div class="stats-label">Audio Files in Library</div>
+            <div class="stats-label">Audio Files Imported</div>
         </div>
 
         <div class="audio-grid" id="audioGrid">
             <div class="empty-state">
-                <h3>🎶 Start Your Collection</h3>
-                <p>Import your first audio files to begin</p>
+                <h3>No audio files imported</h3>
+                <p>Click "Import Audio Files" to get started</p>
             </div>
         </div>
     </div>
 
-    <!-- QR Code Modal -->
-    <div class="qr-modal" id="qrModal">
-        <div class="qr-content">
-            <button class="close-btn" onclick="closeQRModal()">&times;</button>
-            <h3>📱 Scan to Import Library</h3>
-            <div class="qr-code" id="qrCode"></div>
-            <p style="font-size: 0.9rem; color: #666;">
-                Scan this QR code with your phone's camera or QR scanner app
-            </p>
-            <button class="import-btn" onclick="copyQRData()" style="margin-top: 15px; color: #333; border-color: #333;">
-                📋 Copy Link Instead
-            </button>
-        </div>
-    </div>
-
     <script>
-        // Simple QR Code generator (no external dependencies)
-        function generateQR(text) {
-            // Using a free QR code API service
-            const qrSize = 200;
-            const qrAPI = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(text)}`;
-            return `<img src="${qrAPI}" alt="QR Code" style="max-width: 100%; border-radius: 10px;">`;
-        }
-
-        let audioFiles = [];
+        const audioFiles = [];
+        let filteredAudioFiles = [];
         let currentAudio = null;
         let nextId = 1;
-        let filteredAudioFiles = [];
-
-        // Load from localStorage on startup
-        function loadFromLocalStorage() {
-            const savedAudio = localStorage.getItem('audioLibrary');
-            const savedNextId = localStorage.getItem('nextAudioId');
-            
-            if (savedNextId) {
-                nextId = parseInt(savedNextId);
-            }
-            
-            if (savedAudio) {
-                try {
-                    const audioData = JSON.parse(savedAudio);
-                    audioFiles.length = 0;
-                    
-                    audioData.forEach(data => {
-                        const audio = document.createElement('audio');
-                        audio.src = data.audioData;
-                        
-                        const audioFile = {
-                            id: data.id,
-                            title: data.title,
-                            fileName: data.fileName,
-                            fileSize: data.fileSize,
-                            duration: data.duration,
-                            audioData: data.audioData,
-                            audioUrl: data.audioData,
-                            audioElement: audio
-                        };
-                        
-                        audio.load();
-                        audioFiles.push(audioFile);
-                    });
-                } catch (error) {
-                    console.error('Error loading from localStorage:', error);
-                }
-            }
-            
-            renderAudioFiles();
-            updateStats();
-        }
-
-        // Save to localStorage
-        function saveToLocalStorage() {
-            const audioData = audioFiles.map(audio => ({
-                id: audio.id,
-                title: audio.title,
-                fileName: audio.fileName,
-                fileSize: audio.fileSize,
-                duration: audio.duration,
-                audioData: audio.audioData
-            }));
-            localStorage.setItem('audioLibrary', JSON.stringify(audioData));
-            localStorage.setItem('nextAudioId', nextId.toString());
-        }
-
-        // Show QR Code for sharing
-        function showQRCode() {
-            if (audioFiles.length === 0) {
-                alert('📱 Add some audio files first before sharing!');
-                return;
-            }
-
-            const libraryData = {
-                files: audioFiles.map(audio => ({
-                    id: audio.id,
-                    title: audio.title,
-                    fileName: audio.fileName,
-                    fileSize: audio.fileSize,
-                    duration: audio.duration,
-                    audioData: audio.audioData
-                })),
-                nextId: nextId,
-                timestamp: Date.now()
-            };
-
-            // Create a data URL for the library
-            const dataStr = JSON.stringify(libraryData);
-            const dataUrl = `data:application/json;base64,${btoa(dataStr)}`;
-            
-            // Generate QR code
-            const qrCode = document.getElementById('qrCode');
-            qrCode.innerHTML = generateQR(dataUrl);
-            
-            // Show modal
-            document.getElementById('qrModal').style.display = 'flex';
-            
-            // Store the data for copying
-            window.currentQRData = dataUrl;
-        }
-
-        // Close QR modal
-        function closeQRModal() {
-            document.getElementById('qrModal').style.display = 'none';
-        }
-
-        // Copy QR data as link
-        function copyQRData() {
-            if (window.currentQRData) {
-                navigator.clipboard.writeText(window.currentQRData).then(() => {
-                    alert('📋 Library data copied! Paste this into the import field on another device.');
-                }).catch(() => {
-                    // Fallback for older browsers
-                    const textArea = document.createElement('textarea');
-                    textArea.value = window.currentQRData;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    alert('📋 Library data copied! Paste this into the import field on another device.');
-                });
-            }
-        }
-
-        // Export library as downloadable file
-        function exportLibrary() {
-            if (audioFiles.length === 0) {
-                alert('📱 Add some audio files first before exporting!');
-                return;
-            }
-
-            const libraryData = {
-                files: audioFiles.map(audio => ({
-                    id: audio.id,
-                    title: audio.title,
-                    fileName: audio.fileName,
-                    fileSize: audio.fileSize,
-                    duration: audio.duration,
-                    audioData: audio.audioData
-                })),
-                nextId: nextId,
-                exportDate: new Date().toISOString(),
-                version: "1.0"
-            };
-
-            const dataStr = JSON.stringify(libraryData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `audio-library-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            document.getElementById('syncStatus').textContent = '💾 Library exported successfully!';
-            setTimeout(() => {
-                document.getElementById('syncStatus').textContent = '📱 Ready to share';
-            }, 3000);
-        }
-
-        // Import library from file
-        function importLibrary(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    let libraryData;
-                    const content = e.target.result;
-                    
-                    // Check if it's a data URL (from QR code)
-                    if (content.startsWith('data:application/json;base64,')) {
-                        const base64Data = content.split(',')[1];
-                        const jsonStr = atob(base64Data);
-                        libraryData = JSON.parse(jsonStr);
-                    } else {
-                        // Regular JSON file
-                        libraryData = JSON.parse(content);
-                    }
-                    
-                    if (libraryData && libraryData.files) {
-                        const importCount = libraryData.files.length;
-                        
-                        if (confirm(`📂 Import ${importCount} audio files? This will add to your current library.`)) {
-                            libraryData.files.forEach(data => {
-                                const audio = document.createElement('audio');
-                                audio.src = data.audioData;
-                                
-                                const audioFile = {
-                                    id: nextId++,
-                                    title: data.title,
-                                    fileName: data.fileName,
-                                    fileSize: data.fileSize,
-                                    duration: data.duration,
-                                    audioData: data.audioData,
-                                    audioUrl: data.audioData,
-                                    audioElement: audio
-                                };
-                                
-                                audio.load();
-                                audioFiles.push(audioFile);
-                            });
-                            
-                            saveToLocalStorage();
-                            renderAudioFiles();
-                            updateStats();
-                            
-                            document.getElementById('syncStatus').textContent = `✅ Imported ${importCount} files!`;
-                            setTimeout(() => {
-                                document.getElementById('syncStatus').textContent = '📱 Ready to share';
-                            }, 3000);
-                        }
-                    } else {
-                        alert('❌ Invalid library file format');
-                    }
-                } catch (error) {
-                    console.error('Import error:', error);
-                    alert('❌ Error importing library file');
-                }
-            };
-            
-            reader.readAsText(file);
-            event.target.value = '';
-        }
 
         function handleFileUpload(event) {
             const files = event.target.files;
             let importedCount = 0;
-
-            document.getElementById('syncStatus').textContent = '📤 Importing files...';
 
             for (let file of files) {
                 if (file.type.startsWith('audio/')) {
@@ -604,8 +814,8 @@
                     
                     reader.onload = function(e) {
                         const audioData = e.target.result;
-                        const audio = document.createElement('audio');
-                        audio.src = audioData;
+                        const audioUrl = audioData;
+                        const audio = new Audio(audioUrl);
 
                         const newAudio = {
                             id: nextId++,
@@ -613,8 +823,9 @@
                             fileName: file.name,
                             fileSize: formatFileSize(file.size),
                             duration: "0:00",
-                            audioData: audioData,
-                            audioUrl: audioData,
+                            category: "", // Add category field
+                            audioData: audioData, // Store base64 data
+                            audioUrl: audioUrl,
                             audioElement: audio
                         };
 
@@ -624,14 +835,19 @@
                             const seconds = Math.floor(audio.duration % 60);
                             newAudio.duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
                             
+                            // Save to localStorage after getting duration
                             saveToLocalStorage();
                             renderAudioFiles();
+                        });
+                        
+                        // Handle audio loading errors
+                        audio.addEventListener('error', function(e) {
+                            console.error('Audio loading error:', e);
                         });
 
                         audioFiles.push(newAudio);
                         renderAudioFiles();
                         updateStats();
-                        saveToLocalStorage();
                     };
                     
                     reader.readAsDataURL(file);
@@ -641,12 +857,9 @@
 
             if (importedCount === 0) {
                 alert('No valid audio files selected');
-            } else {
-                setTimeout(() => {
-                    document.getElementById('syncStatus').textContent = '📱 Ready to share';
-                }, 2000);
             }
 
+            // Clear the input
             event.target.value = '';
         }
 
@@ -658,11 +871,81 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
         }
 
+        function saveToLocalStorage() {
+            const audioData = audioFiles.map(audio => ({
+                id: audio.id,
+                title: audio.title,
+                fileName: audio.fileName,
+                fileSize: audio.fileSize,
+                duration: audio.duration,
+                category: audio.category || "",
+                audioData: audio.audioData
+            }));
+            localStorage.setItem('audioLibrary', JSON.stringify(audioData));
+            localStorage.setItem('nextId', nextId.toString());
+        }
+
+        function loadFromLocalStorage() {
+            const savedAudio = localStorage.getItem('audioLibrary');
+            const savedNextId = localStorage.getItem('nextId');
+            
+            if (savedNextId) {
+                nextId = parseInt(savedNextId);
+            }
+            
+            if (savedAudio) {
+                try {
+                    const audioData = JSON.parse(savedAudio);
+                    audioData.forEach(data => {
+                        // Create new audio element with the stored base64 data
+                        const audio = new Audio();
+                        audio.src = data.audioData;
+                        
+                        const audioFile = {
+                            id: data.id,
+                            title: data.title,
+                            fileName: data.fileName,
+                            fileSize: data.fileSize,
+                            duration: data.duration,
+                            category: data.category || "",
+                            audioData: data.audioData,
+                            audioUrl: data.audioData,
+                            audioElement: audio
+                        };
+                        
+                        // Ensure audio can be played
+                        audio.load();
+                        
+                        audioFiles.push(audioFile);
+                    });
+                    renderAudioFiles();
+                    updateStats();
+                } catch (error) {
+                    console.error('Error loading audio from localStorage:', error);
+                    // Clear corrupted data
+                    localStorage.removeItem('audioLibrary');
+                }
+            }
+        }
+
+        function clearStorage() {
+            if (confirm('Are you sure you want to delete all audio files?')) {
+                localStorage.removeItem('audioLibrary');
+                localStorage.removeItem('nextId');
+                audioFiles.length = 0;
+                nextId = 1;
+                renderAudioFiles();
+                updateStats();
+                console.log('All audio files cleared from storage');
+            }
+        }
+
         function renderAudioFiles() {
             const grid = document.getElementById('audioGrid');
             const searchSection = document.getElementById('searchSection');
             const displayFiles = filteredAudioFiles.length > 0 ? filteredAudioFiles : audioFiles;
 
+            // Show/hide search bar based on whether there are files
             if (audioFiles.length > 0) {
                 searchSection.style.display = 'block';
             } else {
@@ -672,18 +955,18 @@
             if (audioFiles.length === 0) {
                 grid.innerHTML = `
                     <div class="empty-state">
-                        <h3>🎶 Start Your Collection</h3>
-                        <p>Import your first audio files to begin</p>
+                        <h3>No audio files imported</h3>
+                        <p>Click "Import Audio Files" to get started</p>
                     </div>
                 `;
                 return;
             }
 
-            if (displayFiles.length === 0 && document.getElementById('searchInput').value.trim() !== '') {
+            if (displayFiles.length === 0 && filteredAudioFiles.length === 0 && document.getElementById('searchInput').value.trim() !== '') {
                 grid.innerHTML = `
                     <div class="empty-state">
-                        <h3>🔍 No matches found</h3>
-                        <p>Try a different search term</p>
+                        <h3>No matching audio files</h3>
+                        <p>Try a different search term or clear the search</p>
                     </div>
                 `;
                 return;
@@ -691,25 +974,47 @@
 
             grid.innerHTML = displayFiles.map(audio => `
                 <div class="audio-card">
-                    <div class="audio-title">🎵 ${audio.title}</div>
+                    <div class="audio-title">${audio.title}</div>
+                    <div class="category-section">
+                        ${audio.category ? `
+                            <div class="category-display" id="categoryDisplay${audio.id}">
+                                <div class="category-text">${audio.category}</div>
+                                <div class="category-actions">
+                                    <button class="edit-category-btn" onclick="editCategory(${audio.id})">Edit</button>
+                                    <button class="delete-category-btn" onclick="deleteCategory(${audio.id})">Delete</button>
+                                </div>
+                            </div>
+                            <div class="category-input-section" id="categoryInput${audio.id}" style="display: none;">
+                                <input type="text" class="category-select" placeholder="Enter category name..." value="${audio.category}" id="categoryField${audio.id}">
+                                <div class="category-input-actions">
+                                    <button class="save-category-btn" onclick="saveCategory(${audio.id})">Save</button>
+                                    <button class="cancel-category-btn" onclick="cancelEditCategory(${audio.id})">Cancel</button>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="category-input-section" id="categoryInput${audio.id}">
+                                <input type="text" class="category-select" placeholder="Enter category name..." value="" id="categoryField${audio.id}">
+                                <div class="category-input-actions">
+                                    <button class="save-category-btn" onclick="saveCategory(${audio.id})">Save</button>
+                                </div>
+                            </div>
+                        `}
+                    </div>
                     <div class="audio-info">
-                        <span>⏱️ ${audio.duration}</span>
-                        <span>📁 ${audio.fileSize}</span>
+                        <span>${audio.duration}</span>
+                        <span>${audio.fileSize}</span>
                     </div>
                     <div class="audio-controls">
                         <button class="control-btn play-btn" onclick="togglePlay(${audio.id})" id="playBtn${audio.id}">
-                            ▶️ Play
+                            Play
                         </button>
                         <button class="control-btn" onclick="downloadAudio(${audio.id})">
-                            💾 Download
+                            Download
                         </button>
-                        <button class="control-btn" onclick="deleteAudio(${audio.id})">
-                            🗑️ Delete
+                        <button class="control-btn" onclick="deleteAudio(${audio.id})" style="color: #666;">
+                            Delete
                         </button>
                     </div>
-                    <audio id="audioElement${audio.id}" style="display: none;">
-                        <source src="${audio.audioUrl}">
-                    </audio>
                 </div>
             `).join('');
         }
@@ -717,34 +1022,34 @@
         function togglePlay(id) {
             const audio = audioFiles.find(a => a.id === id);
             const playBtn = document.getElementById(`playBtn${id}`);
-            const audioElement = document.getElementById(`audioElement${id}`);
 
-            if (!audio || !audioElement) return;
+            if (!audio) return;
 
             // Stop any currently playing audio
-            if (currentAudio && currentAudio !== audioElement) {
+            if (currentAudio && currentAudio !== audio.audioElement) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
+                // Reset all play buttons
                 document.querySelectorAll('.play-btn').forEach(btn => {
-                    btn.textContent = '▶️ Play';
+                    btn.textContent = 'Play';
                     btn.classList.remove('playing');
                 });
             }
 
-            if (audioElement.paused) {
-                audioElement.play();
-                playBtn.textContent = '⏸️ Pause';
+            if (audio.audioElement.paused) {
+                audio.audioElement.play();
+                playBtn.textContent = 'Pause';
                 playBtn.classList.add('playing');
-                currentAudio = audioElement;
+                currentAudio = audio.audioElement;
 
-                audioElement.addEventListener('ended', function() {
-                    playBtn.textContent = '▶️ Play';
+                audio.audioElement.addEventListener('ended', function() {
+                    playBtn.textContent = 'Play';
                     playBtn.classList.remove('playing');
                     currentAudio = null;
                 });
             } else {
-                audioElement.pause();
-                playBtn.textContent = '▶️ Play';
+                audio.audioElement.pause();
+                playBtn.textContent = 'Play';
                 playBtn.classList.remove('playing');
                 currentAudio = null;
             }
@@ -763,11 +1068,11 @@
         }
 
         function deleteAudio(id) {
-            if (confirm('🗑️ Delete this audio file?')) {
+            if (confirm('Are you sure you want to delete this audio file?')) {
                 const index = audioFiles.findIndex(a => a.id === id);
                 if (index !== -1) {
-                    const audioElement = document.getElementById(`audioElement${id}`);
-                    if (currentAudio === audioElement) {
+                    // Stop audio if it's currently playing
+                    if (currentAudio === audioFiles[index].audioElement) {
                         currentAudio.pause();
                         currentAudio = null;
                     }
@@ -794,12 +1099,30 @@
 
         function performSearch() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const selectedCategory = document.getElementById('categoryFilter').value;
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
             
+            let filtered = audioFiles;
+            
+            // Filter by category first
+            if (selectedCategory !== '') {
+                filtered = filtered.filter(audio => audio.category === selectedCategory);
+            }
+            
+            // Then filter by search term
             if (searchTerm !== '') {
-                filteredAudioFiles = audioFiles.filter(audio => 
+                filtered = filtered.filter(audio => 
                     audio.title.toLowerCase().includes(searchTerm) ||
                     audio.fileName.toLowerCase().includes(searchTerm)
                 );
+                clearSearchBtn.style.display = 'flex';
+            } else {
+                clearSearchBtn.style.display = 'none';
+            }
+            
+            // Set filtered results
+            if (searchTerm !== '' || selectedCategory !== '') {
+                filteredAudioFiles = filtered;
             } else {
                 filteredAudioFiles = [];
             }
@@ -807,17 +1130,95 @@
             renderAudioFiles();
         }
 
-        // Initialize
-        window.addEventListener('load', function() {
-            loadFromLocalStorage();
-        });
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            filteredAudioFiles = [];
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            renderAudioFiles();
+        }
 
-        // Close modal when clicking outside
-        document.getElementById('qrModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeQRModal();
+        function editCategory(audioId) {
+            const displayElement = document.getElementById(`categoryDisplay${audioId}`);
+            const inputElement = document.getElementById(`categoryInput${audioId}`);
+            
+            if (displayElement && inputElement) {
+                displayElement.style.display = 'none';
+                inputElement.style.display = 'flex';
+                
+                // Focus on the input field
+                const inputField = document.getElementById(`categoryField${audioId}`);
+                if (inputField) {
+                    inputField.focus();
+                    inputField.select();
+                }
             }
-        });
+        }
+
+        function saveCategory(audioId) {
+            const inputField = document.getElementById(`categoryField${audioId}`);
+            if (inputField) {
+                const category = inputField.value.trim();
+                const audio = audioFiles.find(a => a.id === audioId);
+                
+                if (audio) {
+                    audio.category = category;
+                    saveToLocalStorage();
+                    updateCategoryFilter();
+                    renderAudioFiles();
+                }
+            }
+        }
+
+        function cancelEditCategory(audioId) {
+            const displayElement = document.getElementById(`categoryDisplay${audioId}`);
+            const inputElement = document.getElementById(`categoryInput${audioId}`);
+            
+            if (displayElement && inputElement) {
+                displayElement.style.display = 'flex';
+                inputElement.style.display = 'none';
+                
+                // Reset input field to original value
+                const audio = audioFiles.find(a => a.id === audioId);
+                const inputField = document.getElementById(`categoryField${audioId}`);
+                if (audio && inputField) {
+                    inputField.value = audio.category;
+                }
+            }
+        }
+
+        function deleteCategory(audioId) {
+            const audio = audioFiles.find(a => a.id === audioId);
+            if (audio && audio.category) {
+                if (confirm(`Remove category "${audio.category}" from this audio file?`)) {
+                    audio.category = "";
+                    saveToLocalStorage();
+                    updateCategoryFilter();
+                    renderAudioFiles();
+                }
+            }
+        }
+
+        function updateCategoryFilter() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const categories = [...new Set(audioFiles.map(audio => audio.category).filter(cat => cat !== ''))];
+            
+            // Clear existing options except "All Categories"
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            
+            // Add categories that are actually in use
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+        }
+
+        // Initialize - load saved files and render
+        loadFromLocalStorage();
+        updateCategoryFilter();
+        renderAudioFiles();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9882d6b843a7a491',t:'MTc1OTM5MzgzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9882e2f2530ca491',t:'MTc1OTM5NDMzOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
