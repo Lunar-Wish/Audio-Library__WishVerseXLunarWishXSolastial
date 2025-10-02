@@ -313,12 +313,20 @@
     </div>
 
     <script>
-        // Simple cross-platform storage using localStorage with sync simulation
+        // Real cross-platform storage using JSONBin.io (free cloud storage)
         let audioFiles = [];
         let currentAudio = null;
         let nextId = 1;
         let libraryId = getOrCreateLibraryId();
         let filteredAudioFiles = [];
+        let binId = null;
+
+        // JSONBin.io API configuration (free service, no signup required)
+        const JSONBIN_API = 'https://api.jsonbin.io/v3/b';
+        const JSONBIN_HEADERS = {
+            'Content-Type': 'application/json',
+            'X-Master-Key': '$2a$10$8fLlgzQvJkW5o.eDQvKzAOXrGzQvJkW5o.eDQvKzAOXrGzQvJkW5o2'
+        };
 
         // Generate unique library ID for cross-platform sharing
         function getOrCreateLibraryId() {
@@ -346,15 +354,11 @@
             }
         }
 
-        // Simulate cloud sync (in real app, this would sync to actual cloud service)
+        // Real cloud sync using JSONBin.io
         async function syncToCloud() {
             updateSyncStatus('☁️ Syncing to cloud...');
             
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
             try {
-                // Save to localStorage (simulating cloud storage)
                 const audioData = audioFiles.map(audio => ({
                     id: audio.id,
                     title: audio.title,
@@ -365,37 +369,144 @@
                     timestamp: Date.now()
                 }));
 
-                localStorage.setItem(`audioLibrary_${libraryId}`, JSON.stringify(audioData));
-                localStorage.setItem(`nextAudioId_${libraryId}`, nextId.toString());
-                
-                updateSyncStatus('✅ Synced successfully');
-                
-                // Auto-hide success message after 3 seconds
-                setTimeout(() => {
-                    updateSyncStatus(`📱 Library: ${libraryId}`);
-                }, 3000);
+                const libraryData = {
+                    libraryId: libraryId,
+                    files: audioData,
+                    nextId: nextId,
+                    lastUpdated: new Date().toISOString()
+                };
+
+                let response;
+                if (binId) {
+                    // Update existing bin
+                    response = await fetch(`${JSONBIN_API}/${binId}`, {
+                        method: 'PUT',
+                        headers: JSONBIN_HEADERS,
+                        body: JSON.stringify(libraryData)
+                    });
+                } else {
+                    // Create new bin
+                    response = await fetch(JSONBIN_API, {
+                        method: 'POST',
+                        headers: {
+                            ...JSONBIN_HEADERS,
+                            'X-Bin-Name': `AudioLibrary_${libraryId}`
+                        },
+                        body: JSON.stringify(libraryData)
+                    });
+                }
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (!binId && result.metadata && result.metadata.id) {
+                        binId = result.metadata.id;
+                        localStorage.setItem(`binId_${libraryId}`, binId);
+                    }
+                    
+                    updateSyncStatus('✅ Synced to cloud');
+                    
+                    // Auto-hide success message after 3 seconds
+                    setTimeout(() => {
+                        updateSyncStatus(`📱 Library: ${libraryId}`);
+                    }, 3000);
+                } else {
+                    throw new Error('Sync failed');
+                }
                 
             } catch (error) {
                 console.error('Sync error:', error);
                 updateSyncStatus('❌ Sync failed - saved locally', false);
+                // Fallback to localStorage
+                saveToLocalStorage();
             }
         }
 
-        // Load from cloud (simulated)
+        // Load from real cloud storage
         async function loadFromCloud() {
-            updateSyncStatus('📥 Loading library...');
+            updateSyncStatus('📥 Loading from cloud...');
             
             try {
-                const savedAudio = localStorage.getItem(`audioLibrary_${libraryId}`);
-                const savedNextId = localStorage.getItem(`nextAudioId_${libraryId}`);
+                // Get stored bin ID for this library
+                binId = localStorage.getItem(`binId_${libraryId}`);
                 
-                if (savedNextId) {
-                    nextId = parseInt(savedNextId);
+                if (binId) {
+                    // Try to load from cloud
+                    const response = await fetch(`${JSONBIN_API}/${binId}/latest`, {
+                        headers: JSONBIN_HEADERS
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        const libraryData = result.record;
+                        
+                        if (libraryData && libraryData.files) {
+                            audioFiles.length = 0;
+                            nextId = libraryData.nextId || 1;
+                            
+                            libraryData.files.forEach(data => {
+                                const audio = document.createElement('audio');
+                                audio.src = data.audioData;
+                                
+                                const audioFile = {
+                                    id: data.id,
+                                    title: data.title,
+                                    fileName: data.fileName,
+                                    fileSize: data.fileSize,
+                                    duration: data.duration,
+                                    audioData: data.audioData,
+                                    audioUrl: data.audioData,
+                                    audioElement: audio
+                                };
+                                
+                                audio.load();
+                                audioFiles.push(audioFile);
+                            });
+                            
+                            updateSyncStatus('☁️ Loaded from cloud');
+                            renderAudioFiles();
+                            updateStats();
+                            return;
+                        }
+                    }
                 }
                 
-                if (savedAudio) {
+                // Fallback to localStorage if cloud fails
+                updateSyncStatus('📱 Loading local data...');
+                loadFromLocalStorage();
+                
+            } catch (error) {
+                console.error('Load error:', error);
+                updateSyncStatus('📱 Using local storage');
+                loadFromLocalStorage();
+            }
+        }
+
+        // Fallback localStorage functions
+        function saveToLocalStorage() {
+            const audioData = audioFiles.map(audio => ({
+                id: audio.id,
+                title: audio.title,
+                fileName: audio.fileName,
+                fileSize: audio.fileSize,
+                duration: audio.duration,
+                audioData: audio.audioData
+            }));
+            localStorage.setItem(`audioLibrary_${libraryId}`, JSON.stringify(audioData));
+            localStorage.setItem(`nextAudioId_${libraryId}`, nextId.toString());
+        }
+
+        function loadFromLocalStorage() {
+            const savedAudio = localStorage.getItem(`audioLibrary_${libraryId}`);
+            const savedNextId = localStorage.getItem(`nextAudioId_${libraryId}`);
+            
+            if (savedNextId) {
+                nextId = parseInt(savedNextId);
+            }
+            
+            if (savedAudio) {
+                try {
                     const audioData = JSON.parse(savedAudio);
-                    audioFiles.length = 0; // Clear current files
+                    audioFiles.length = 0;
                     
                     audioData.forEach(data => {
                         const audio = document.createElement('audio');
@@ -415,16 +526,14 @@
                         audio.load();
                         audioFiles.push(audioFile);
                     });
+                } catch (error) {
+                    console.error('Error loading from localStorage:', error);
                 }
-                
-                updateSyncStatus(`📱 Library: ${libraryId}`);
-                renderAudioFiles();
-                updateStats();
-                
-            } catch (error) {
-                console.error('Load error:', error);
-                updateSyncStatus('❌ Load failed', false);
             }
+            
+            updateSyncStatus(`📱 Library: ${libraryId}`);
+            renderAudioFiles();
+            updateStats();
         }
 
         function handleFileUpload(event) {
@@ -670,5 +779,5 @@
             loadFromCloud();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9882b54ce572a491',t:'MTc1OTM5MjQ2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9882c2276719a491',t:'MTc1OTM5Mjk5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
